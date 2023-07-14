@@ -13,30 +13,52 @@ def createGrid(grid):
 print("Let's play Battleship!")
     
 createGrid(grid)
-
-
 while True:
-    guessRow = int(input("Which row do you want to strike: "))
-    guessColumn = int(input("Which column do you want to strike: "))
     
-    if grid[guessRow][guessColumn] == "x":
-            print("You already guessed right there, try again")
-            
-    elif guessRow in (0, 1, 2, 3, 4) and guessColumn in (0, 1, 2, 3, 4):
-        grid[guessRow][guessColumn] = "x"
-        print("you struck at ", guessRow, ",", guessColumn)
-        
-    else:
-        if guessRow != (0, 1, 2, 3, 4):
-            print("Please enter a number between 0-4")
+    
+    while True:
+        try:
             guessRow = int(input("Which row do you want to strike: "))
-            
-        if guessColumn != (0, 1, 2, 3, 4):
-            print("PLease enter a number between 0-4")
             guessColumn = int(input("Which column do you want to strike: "))
-    
+            
+            
+            if guessRow < 0 or guessRow > 4 or guessColumn < 0 or guessColumn > 4:
+                raise ValueError
+            
+            break  
+        
+        except ValueError:
+            print('Please enter a number between 0-4')
+            
+            
+    while True:
+        
+        if grid[guessRow][guessColumn] == "x":
+                print("You already guessed right there, try again")
+                
+        elif guessRow in (0, 1, 2, 3, 4) and guessColumn in (0, 1, 2, 3, 4):
+            grid[guessRow][guessColumn] = "x"
+            print("you struck at ", guessRow, ",", guessColumn)
+            
+        else:
+            if guessRow != (0, 1, 2, 3, 4):
+                print("Please enter a number between 0-4")
+                guessRow = int(input("Which row do you want to strike: "))
+                
+            if guessColumn != (0, 1, 2, 3, 4):
+                print("PLease enter a number between 0-4")
+                guessColumn = int(input("Which column do you want to strike: "))
+                
+        break
+        
     createGrid(grid)        
     
+    
+    
+            
+            
+
+        
     
                 
             
