@@ -78,8 +78,8 @@ createGrid(grid)
 turn = 1
 computerTurn = 1
 
-computerShipRow = randint(0, len(grid) + 1)
-computerShipColumn = randint(0, len(grid) + 1)
+computerShipRow = randint(0, len(grid) - 1)
+computerShipColumn = randint(0, len(grid) - 1)
 
 while turn in range(6):
     print("Turn",turn)
@@ -97,21 +97,21 @@ while turn in range(6):
                 
             elif guessColumn < 0 or guessColumn > len(grid) - 1:
                 raise ValueError
-            break 
+            break
         except ValueError:
-            print('Please enter a number between 0 -', len(grid) - 1)
-            
-            
-            
+            print('Please enter a number between 1 -', len(grid))
+
+
+
     if guessRow not in range(len(grid)):
         print("Row not in range of board")
-        print('Please enter a number between 0 -', len(enemyGrid) - 1)
-    
+        print('Please enter a number between 1 -', len(enemyGrid))
+
     elif guessColumn not in range(len(grid)):
         print("Col not in range of board")
-        print('Please enter a number between 0 -', len(enemyGrid) - 1)
+        print('Please enter a number between 1 -', len(enemyGrid))
 
-    
+
     else:
         if (guessRow == computerShipRow) and (guessColumn == computerShipColumn):
             print("Yay! You sunk the enemy's battleship!")
@@ -119,7 +119,7 @@ while turn in range(6):
 
 
         elif guessRow in range(0, len(grid)) and guessColumn in range (0, len(grid)):
-            print(f"You guessed ({str(guessRow)}, {guessColumn})", "and missed the opponents ship!")
+            print(f"You guessed at ({guessRow + 1}, {guessColumn + 1})", "and missed the opponents ship!")
             turn = turn + 1
 
 
@@ -131,7 +131,7 @@ while turn in range(6):
             grid[computerRowGuess][computerColumnGuess] = (Fore.RED + "X" + Fore.WHITE)
             print (f"Computer guessed ({str(computerRowGuess + 1)},{computerColumnGuess + 1})")
             computerTurn += 1
-       
+
 
         if computerRowGuess == user_ship_row and computerColumnGuess == user_ship_col:
             createGrid(grid)
@@ -149,5 +149,5 @@ while turn in range(6):
         print("No one could sink a ship!")
         print(f"The opponent's battleship was located at: ({computerShipRow + 1}, {computerShipColumn + 1}).")
         exit()
-    
+
     createGrid(grid)
