@@ -1,153 +1,177 @@
-from colorama import Fore
 from random import randint
-grid = []
-enemyGrid = []
+from colorama import Fore
 
-while True:
-    try:
-        boardSize =int(input("Enter the size of the board that you want to play on: "))
-        
-        if boardSize < 3 or boardSize > 10:
-            raise ValueError
-            
-        
-        break
-    
-    except ValueError:
-        print("Please choose a board size between 3 - 10")
-    
-        
-for x in range(boardSize):
-    grid.append(["O"] * boardSize)
+grid_size = 10
+grid = [['O'] * grid_size for _ in range(grid_size)]
+enemy_grid = [['O'] * grid_size for _ in range(grid_size)]
 
-def createGrid(grid):
-    for rows in grid:
-        for column in rows:
-            print(column, end=" ")
+def create_grid(grid , show_ships=False):
+    for row in grid:
+        for column in row:
+            if not show_ships and column in ['S', 'D']:
+                print('O', end=' ')
+            else:
+                print(column, end=' ')
         print()
-        
+print("Welcome to the game, Battleship!")
 
-while True:
-    try:
-        Placement = int(input("How do you want the battleship to be placed?" "\n" "1. I want to place it" "\n" "2. Random" "\n"))
-        
-        if Placement < 1 or Placement > 2:
-            raise ValueError
-        
-        break 
-    except ValueError:
-        print("Enter either choice 1 or 2")
-            
-
-if Placement == 1:
+def get_valid_ship_coordinate(prompt):
     while True:
         try:
-            user_ship_row = int(input("PLease enter a row indexed at 1: ")) - 1
-            user_ship_col = int(input("PLease enter a col indexed at 1: ")) - 1
-            
-            if user_ship_row < 0 or user_ship_row > len(grid) - 1:
-                raise ValueError
-            
-            elif user_ship_col < 0 or user_ship_col > len(grid) - 1:
-                raise ValueError
-            
+            coordinate = int(input(prompt)) - 1
+            if 0 <= coordinate < grid_size:
+                return coordinate
+            raise ValueError
         except ValueError:
             print("Please enter a valid coordinate on the grid!")
+
+def place_ship(grid, ship_length, ship_marker, ship_name):
+    print(f"Place your '{ship_name}' ({ship_length} indices long)")
+    while True:
+        while True:
+            user_ship_row = get_valid_ship_coordinate("Please enter a row (1-10): ")
+            user_ship_col = get_valid_ship_coordinate("Please enter a col (1-10): ")
+
+            if grid[user_ship_row][user_ship_col] != 'O':
+                print("You can't place a ship there. Try again.")
+                continue
+            break
+
+        orientation = input("Choose orientation (H for horizontal, V for vertical): ").upper()
+        if orientation not in ['H', 'V']:
+            print("Invalid orientation. Try again.")
             continue
-        grid[user_ship_row][user_ship_col] =(Fore.LIGHTBLACK_EX + "B" + Fore.WHITE)
-        print()
-        break
+
+        valid_placement = True
+        if orientation == 'H' and user_ship_col + ship_length <= grid_size:
+            for i in range(ship_length):
+                if grid[user_ship_row][user_ship_col + i] != 'O':
+                    valid_placement = False
+                    break
+            if valid_placement:
+                for i in range(ship_length):
+                    grid[user_ship_row][user_ship_col + i] = ship_marker
+                break
+
+        elif orientation == 'V' and user_ship_row + ship_length <= grid_size:
+            for i in range(ship_length):
+                if grid[user_ship_row + i][user_ship_col] != 'O':
+                    valid_placement = False
+                    break
+            if valid_placement:
+                for i in range(ship_length):
+                    grid[user_ship_row + i][user_ship_col] = ship_marker
+                break
+
+        print("Invalid placement. Try again.")
+
+def random_ship_placement(grid, num_ships, ship_length, ship_marker, ship_name):
+    ship_length  = 2
+    while True:
+        ship_row = randint(0, grid_size - 1)
+        ship_col = randint(0, grid_size - 1)
+
+        orientation = randint(0, 1)  # 0 for horizontal, 1 for vertical
+        valid_placement = True
+        if orientation == 0 and ship_col + ship_length <= grid_size:
+            for i in range(ship_length):
+                if enemy_grid[ship_row][ship_col + i] != 'O':
+                    valid_placement = False
+                    break
+            if valid_placement:
+                for i in range(ship_length):
+                    enemy_grid[ship_row][ship_col + i] = ship_marker
+                break
+
+        elif orientation == 1 and ship_row + ship_length <= grid_size:
+            for i in range(ship_length):
+                if enemy_grid[ship_row + i][ship_col] != 'O':
+                    valid_placement = False
+                    break
+            if valid_placement:
+                for i in range(ship_length):
+                    enemy_grid[ship_row + i][ship_col] = ship_marker
+                break
+
+if __name__ == "__main__":
+    num_ships_per_player = 2
+    ship_length = 2
+
+    user_ship_marker = Fore.GREEN + "S" + Fore.WHITE
+    user_ship_name1 = input("Enter the name for your first ship: ")   
+    place_ship(grid, ship_length, user_ship_marker, user_ship_name1)
+
+    user_ship_marker = Fore.GREEN + "D" + Fore.WHITE
+    user_ship_name2 = input("Enter the name for your second ship: ")
+    place_ship(grid, ship_length, user_ship_marker, user_ship_name2)
+
+    computer_ship_marker = "C"
+    computer_ship_name1 = "Enemy Ship 1"
+    random_ship_placement(enemy_grid, num_ships_per_player, ship_length, computer_ship_marker, computer_ship_name1)
+
+    computer_ship_marker = "D"
+    computer_ship_name2 = "Enemy Ship 2"
+    random_ship_placement(enemy_grid, num_ships_per_player, ship_length, computer_ship_marker, computer_ship_name2)
+
+    print("Let's play Battleship!")
+    print("Your grid:")
+    create_grid(grid, show_ships=True)  # Show user's grid with their ships
+
+    user_ships_remaining = num_ships_per_player * 2
+    computer_ships_remaining = num_ships_per_player * 2
+    computer_ships = [computer_ship_marker, computer_ship_marker]
+    
+    turn = 0
+    for turn in range(8):
+        print("Turn", turn + 1)
+        while True:
+            guess_row = get_valid_ship_coordinate("Which row do you want to strike? (1-10): ")
+            guess_col = get_valid_ship_coordinate("Which column do you want to strike? (1-10): ")
+            
+            computer_guess_row = randint(0, 9)
+            computer_guess_col = randint(0, 9)
+            
+            if enemy_grid[guess_row][guess_col] in ['X', 'M']:
+                print("You've already guessed this spot. Try again.")
+            else:
+                break
+        if enemy_grid[guess_row][guess_col] not in ("C","D"):
+            print(f"You struck at {guess_row + 1} , {guess_col + 1} and missed!")
+            enemy_grid[guess_row][guess_col] = "X"
+        else:
+            print(f"You hit the enemy's {computer_ship_name1}!")
+            enemy_grid[guess_row][guess_col] = "X"
+            computer_ships_remaining = computer_ships_remaining - 1
+
+        if grid[computer_guess_row][computer_guess_col] in ('S', 'D'):
+            print('\n')
+            grid[computer_guess_row][computer_guess_col] = Fore.BLACK + 'H' + Fore.WHITE
+            print("Computer hit your ship!")
+            user_ships_remaining -= 1
+            
+            if user_ships_remaining == 0:
+                print("All your ships have sunk! You lose!")
+                break
+                    
+        elif grid[computer_guess_row][computer_guess_col] not in ("S", "D"):
+                print()
+                grid[computer_guess_row][computer_guess_col] = Fore.RED + 'M' + Fore.WHITE
+                print("Computer missed!")
+                
+            
+                
+
+        print("Your grid:")
+        create_grid(grid, show_ships=True)
+        print('\n')
         
 
-def ran_row(grid):
-        return randint(0, len(grid) - 1)
-    
-def ran_col(grid):
-        return randint(0, len(grid[0]) - 1)
-
-    
-if (Placement == 2):      
-    user_ship_row = ran_row(grid)
-    user_ship_col = ran_col(grid)
-    grid[user_ship_row][user_ship_col] =(Fore.LIGHTBLACK_EX + "B" + Fore.WHITE)
-    print()
-
-print("Let's play Battleship!")
-createGrid(grid)
-
-turn = 1
-computerTurn = 1
-
-computerShipRow = randint(0, len(grid) - 1)
-computerShipColumn = randint(0, len(grid) - 1)
-
-while turn in range(6):
-    print("Turn",turn)
-
-    computerRowGuess= randint(0, len(grid) - 1)
-    computerColumnGuess = randint(0, len(grid) - 1)
-    
-    while True:
-        try:
-            guessRow = int(input("Which row do you want to strike: ")) - 1
-            guessColumn = int(input("Which column do you want to strike: ")) - 1
-            
-            if guessRow < 0 or guessRow > len(grid) - 1:
-               raise ValueError
-                
-            elif guessColumn < 0 or guessColumn > len(grid) - 1:
-                raise ValueError
-            break
-        except ValueError:
-            print('Please enter a number between 1 -', len(grid))
-
-
-
-    if guessRow not in range(len(grid)):
-        print("Row not in range of board")
-        print('Please enter a number between 1 -', len(enemyGrid))
-
-    elif guessColumn not in range(len(grid)):
-        print("Col not in range of board")
-        print('Please enter a number between 1 -', len(enemyGrid))
-
-
-    else:
-        if (guessRow == computerShipRow) and (guessColumn == computerShipColumn):
-            print("Yay! You sunk the enemy's battleship!")
-            break
-
-
-        elif guessRow in range(0, len(grid)) and guessColumn in range (0, len(grid)):
-            print(f"You guessed at ({guessRow + 1}, {guessColumn + 1})", "and missed the opponents ship!")
-            turn = turn + 1
-
-
-    while computerTurn in range(6):
-        print()
-        print("Enemy turn ", computerTurn)
-
-        if computerRowGuess in range(0, len(grid)) and computerColumnGuess in range(0, len(grid)):
-            grid[computerRowGuess][computerColumnGuess] = (Fore.RED + "X" + Fore.WHITE)
-            print (f"Computer guessed ({str(computerRowGuess + 1)},{computerColumnGuess + 1})")
-            computerTurn += 1
-
-
-        if computerRowGuess == user_ship_row and computerColumnGuess == user_ship_col:
-            createGrid(grid)
-            print()
-            print("You lost! The enemy sunk your battleship")
-            print(f"The opponent's battleship was located at: ({computerShipRow + 1}, {computerShipColumn + 1}).")
-            exit()
-        break
-
-
-    if (turn == 6) or (computerTurn == 6):
-        createGrid(grid)
-        print()
-        print("GAME OVER")
-        print("No one could sink a ship!")
-        print(f"The opponent's battleship was located at: ({computerShipRow + 1}, {computerShipColumn + 1}).")
-        exit()
-
-    createGrid(grid)
+        if turn == 7 or (user_ships_remaining == 0 or computer_ships_remaining == 0):
+            print("\nGAME OVER")
+            if user_ships_remaining != 0 and computer_ships_remaining != 0:
+                print("It's a tie! Both players couldn't sink any ships.")
+            elif user_ships_remaining == 0:
+                print("You lost! The enemy sunk your ships.")
+            else:
+                print("Congratulations! You sunk all enemy ships!")
+            break      
