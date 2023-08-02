@@ -462,7 +462,7 @@ if __name__ == "__main__":
         
         if enemy_grid[guess_row][guess_col] not in ('C' ,'D', 'P', 'B', 'S'):
             print()
-            print(f"You struck at {guess_row + 1} , {guess_col + 1} and missed!")
+            print(f"You struck at {chr(65 + guess_row)} , {guess_col + 1} and missed!")
             enemy_grid[guess_row][guess_col] = "X"
         
         if enemy_grid[guess_row][guess_col] == 'C':
@@ -556,3 +556,4 @@ if __name__ == "__main__":
             print("\nGAME OVER")
             if user_ships_remaining != 0 and computer_ships_remaining != 0:
                 print("It's a tie! Both players couldn't sink any ships.")
+
